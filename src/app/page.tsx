@@ -1,45 +1,14 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
 import { fabric } from 'fabric'
 import { Button, ButtonGroup } from '@mui/material'
-import { downloadTextAsFile } from '../editor/download-file'
-import { getRandomNumber } from '../util/random'
 import { useFabric } from '../hooks/use-fabric'
 
 export default function Home() {
-    // const canvasRef = useRef<HTMLCanvasElement>(null)
 
-    // const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | Falsy>(
-    //     null
-    // )
-    // const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | Falsy>(null)
-    const [visibleGroup, setVisibleGroup] = useState<fabric.Group | Falsy>(null)
 
-    const { canvasRef } = useFabric((fabricCanvas: fabric.Canvas) => {
-        const group = new fabric.Group()
-        // fabricCanvas.add(visibleGroup)
-        const canvasBackground = new fabric.Rect({
-            left: 0,
-            top: 0,
-            fill: 'gray',
-            width: 600,
-            height: 600,
-            selectable: false
-        })
-        fabricCanvas.add(canvasBackground)
+    const { canvasRef, fabricCanvas, addToCanvas } = useFabric((fabricCanvas: fabric.Canvas) => {
 
-        const background = new fabric.Rect({
-            left: 50,
-            top: 50,
-            fill: 'white',
-            width: 500,
-            height: 500,
-            selectable: false
-        })
-        // fabricCanvas.add(background)
 
-        fabricCanvas.add(background)
-        group.add(background)
         const rect = new fabric.Rect({
             left: 100,
             top: 100,
@@ -48,88 +17,36 @@ export default function Home() {
             height: 50
         })
 
-        group.add(rect)
         fabricCanvas.add(rect)
-        const rect2 = new fabric.Rect({
-            left: 300,
-            top: 400,
-            fill: 'green',
-            width: 50,
-            height: 50,
-        })
+        // addToCanvas(rect)
 
-        group.add(rect2)
-        fabricCanvas.add(rect2)
-        // fabricCanvas.setActiveObject(rect2)
-        // setVisibleGroup(group)
-    })
-    // useEffect(() => {
-    //     // console.log('use effect start')
-    //     // if (!fabricCanvas) return
-    //     // console.log('hi')
-    //     // const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-    //     //     interactive: true,
-    //     //     selection: true,
-    //     //     centeredScaling: true,
-    //     //     centeredRotation: true
-    //     // })
+        // const rect2 = new fabric.Rect({
+        //     left: 300,
+        //     top: 400,
+        //     fill: 'green',
+        //     width: 50,
+        //     height: 50,
+        // })
 
-    //     // setFabricCanvas(fabricCanvas)
+        // addToCanvas(rect2)
+
         
-    //     const group = new fabric.Group()
-    //     // fabricCanvas.add(visibleGroup)
-    //     const canvasBackground = new fabric.Rect({
-    //         left: 0,
-    //         top: 0,
-    //         fill: 'gray',
-    //         width: 600,
-    //         height: 600,
-    //         selectable: false
-    //     })
-    //     fabricCanvas.add(canvasBackground)
 
-    //     const background = new fabric.Rect({
-    //         left: 50,
-    //         top: 50,
-    //         fill: 'white',
-    //         width: 500,
-    //         height: 500,
-    //         selectable: false
-    //     })
-    //     // fabricCanvas.add(background)
+        // scaling and rotating mouse controls don't work until there's a group select for some reason :)
+        // const groupSelect = new fabric.ActiveSelection([rect, rect2])
+        // fabricCanvas.setActiveObject(groupSelect)
 
-    //     fabricCanvas.add(background)
-    //     group.add(background)
-    //     const rect = new fabric.Rect({
-    //         left: 100,
-    //         top: 100,
-    //         fill: 'red',
-    //         width: 50,
-    //         height: 50
-    //     })
-
-    //     group.add(rect)
-    //     fabricCanvas.add(rect)
-    //     const rect2 = new fabric.Rect({
-    //         left: 300,
-    //         top: 400,
-    //         fill: 'green',
-    //         width: 50,
-    //         height: 50,
-    //     })
-
-    //     group.add(rect2)
-    //     fabricCanvas.add(rect2)
-    //     fabricCanvas.setActiveObject(rect2)
-    //     setVisibleGroup(group)
-    //     // fabricCanvas.renderAll()
-    // }, [fabricCanvas])
+        // group.add(rect2)
+        // fabricCanvas.add(rect2)
+        // fabricCanvas.setActiveObject(rect2)
+        // fabricCanvas.renderAll()
+    })
 
     const onExport = () => {
-        if (!visibleGroup) return
-        const groupSVG = visibleGroup.toSVG()
-        const SVGWithParent = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="50 50 500 500" fill="none">${groupSVG}</svg>`
-        downloadTextAsFile('export.svg', SVGWithParent)
+        // if (!visibleGroup) return
+        // const groupSVG = visibleGroup.toSVG()
+        // const SVGWithParent = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="50 50 500 500" fill="none">${groupSVG}</svg>`
+        // downloadTextAsFile('export.svg', SVGWithParent)
     }
 
     const createRect = () => {
