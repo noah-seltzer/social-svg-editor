@@ -1,24 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { setupListeners } from "@reduxjs/toolkit/query"
+import editor from "./editor"
 
 export const store = configureStore({
     reducer: {
-    //   [api.reducerPath]: api.reducer,
-    //   localization: localizationReducer,
-    //   design: designReducer,
-    //   stitch: stitchReducer,
-    //   dashboard: dashboardReducer,
-    //   websiteBuilder: websiteBuilderReducer,
-    //   domainRegistry: domainRegistry,
-    //   logoEditor: logoEditorReducer,
-    //   logoResizer: logoResizerReducer,
-    //   checkout: checkoutReducer,
+      editor: editor
     },
-  
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware()
-        // NOTE: Since this can receive actions with functions inside,
-        // it should go before the serializability check middleware
   })
   
   export type RootState = ReturnType<typeof store.getState>

@@ -51,8 +51,6 @@ export const SnappyRect = fabric.util.createClass(fabric.Rect, {
       opacity: 1
     };
 
-    // console.log(pos);
-    // console.log(this);
 
     switch (side) {
       case "top":

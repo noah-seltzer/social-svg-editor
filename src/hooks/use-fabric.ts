@@ -1,32 +1,70 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from 'react'
 import { fabric } from 'fabric'
-import { useAppSelector } from "./hooks"
+import { useAppDispatch, useAppSelector } from './hooks'
+import { editorMouseDown, editorMouseMove, editorMouseUp, resetMousePositions } from '../store/editor'
 
+
+const prepEventForDispatch = (event: fabric.IEvent<MouseEvent>): Record<string, any> => {
+    return {
+        ...event,
+        e: undefined,
+        target: undefined,
+        absolutePointer: undefined,
+        currentTarget: undefined,
+    }
+}
 export const useFabric = (
     onLoaded?: (canvas: fabric.Canvas) => void
-) : {
+): {
     canvasRef: React.MutableRefObject<HTMLCanvasElement | null>
     fabricCanvas: fabric.Canvas | Falsy
     addToCanvas: (obj: fabric.Object) => void
 } => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
+    const dispatch = useAppDispatch()
 
-    const [fCanvas, setFabric] = useState<fabric.Canvas | null>(null)
+    const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null)
     const [visibleGroup, setVisibleGroup] = useState<fabric.Group | null>(null)
 
-    const toolSelected = useAppSelector(state => state.logoEditor.toolSelected)
+    const mouseDownPosition = useAppSelector(state => state.editor.mouseDownPosition)
+    const mouseUpPosition = useAppSelector(state => state.editor.mouseUpPosition)
+
+    useEffect(()=> {
+        if (mouseUpPosition && mouseDownPosition && fabricCanvas) {
+            console.log('EXECUTING')
+            const left = Math.min(mouseDownPosition.x, mouseUpPosition.x)
+            const top = Math.min(mouseDownPosition.y, mouseUpPosition.y)
+            const right = Math.max(mouseDownPosition.x, mouseUpPosition.x)
+            const bottom = Math.max(mouseDownPosition.y, mouseUpPosition.y)
+
+            const width = right - left
+            const height = bottom - top
+            const newRect = new fabric.Rect({
+                fill: 'red',
+                left,
+                top,
+                width,
+                height
+            })
+            fabricCanvas.add(newRect)
+            // fabricCanvas.renderAll()
+            dispatch(resetMousePositions())
+        }
+    },[mouseUpPosition, mouseDownPosition])
 
     useEffect(() => {
-        if (!canvasRef.current || fCanvas) return
+        if (!canvasRef.current || fabricCanvas) return
 
-        const fabricCanvas = new fabric.Canvas(canvasRef.current, {
+        const canvas = new fabric.Canvas(canvasRef.current, {
             interactive: true,
             selection: true,
             centeredScaling: true,
             centeredRotation: true
         })
+
+
         const group = new fabric.Group()
-        // fabricCanvas.add(visibleGroup)
+
         const canvasBackground = new fabric.Rect({
             left: 0,
             top: 0,
@@ -35,7 +73,7 @@ export const useFabric = (
             height: 600,
             selectable: false
         })
-        fabricCanvas.add(canvasBackground)
+        canvas.add(canvasBackground)
 
         const background = new fabric.Rect({
             left: 50,
@@ -46,30 +84,40 @@ export const useFabric = (
             selectable: false
         })
 
-        fabricCanvas.add(background)
+        canvas.add(background)
         group.add(background)
-        const groupSelect = new fabric.ActiveSelection([background, canvasBackground])
+        const groupSelect = new fabric.ActiveSelection([
+            background,
+            canvasBackground
+        ])
 
-        fabricCanvas.setActiveObject(groupSelect)
+        canvas.setActiveObject(groupSelect)
 
-        fabricCanvas.discardActiveObject()
+        canvas.discardActiveObject()
 
-
-        fabricCanvas.on('mouse:down', () => {
-            console.log('mouse down', toolSelected)
-        })
         setVisibleGroup(group)
-        setFabric(fabricCanvas)
+        setFabricCanvas(canvas)
+
+        const bindings: {key: fabric.EventName, handler: (event: Record<string, any>) => void}[] = [
+            {key: 'mouse:down', handler: (event) => dispatch(editorMouseDown(event))},
+            {key: 'mouse:up', handler: (event) => dispatch(editorMouseUp(event))},
+            {key: 'mouse:move', handler: (event) => dispatch(editorMouseMove(event))}
+        ]
+
+        bindings.forEach(binding => {
+            canvas.on(binding.key, (event) => binding.handler(prepEventForDispatch(event)))
+        })
+
         if (onLoaded) {
-            onLoaded(fabricCanvas)
+            onLoaded(canvas)
         }
     }, [canvasRef.current])
 
 
     const addToCanvas = (obj: fabric.Object) => {
-        fCanvas?.add(obj)
+        fabricCanvas?.add(obj)
         visibleGroup?.add(obj)
     }
-    
-    return { canvasRef, fabricCanvas: fCanvas, addToCanvas, visibleGroup }
+
+    return { canvasRef, fabricCanvas: fabricCanvas, addToCanvas }
 }
