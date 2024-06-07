@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { fabric } from 'fabric'
+import { useAppSelector } from "./hooks"
 
 export const useFabric = (
     onLoaded?: (canvas: fabric.Canvas) => void
@@ -13,10 +14,10 @@ export const useFabric = (
     const [fCanvas, setFabric] = useState<fabric.Canvas | null>(null)
     const [visibleGroup, setVisibleGroup] = useState<fabric.Group | null>(null)
 
+    const toolSelected = useAppSelector(state => state.logoEditor.toolSelected)
+
     useEffect(() => {
-        console.log('hook useeffect')
         if (!canvasRef.current || fCanvas) return
-        console.log('executing')
 
         const fabricCanvas = new fabric.Canvas(canvasRef.current, {
             interactive: true,
@@ -53,16 +54,19 @@ export const useFabric = (
 
         fabricCanvas.discardActiveObject()
 
+
+        fabricCanvas.on('mouse:down', () => {
+            console.log('mouse down', toolSelected)
+        })
         setVisibleGroup(group)
         setFabric(fabricCanvas)
         if (onLoaded) {
             onLoaded(fabricCanvas)
-        }        
+        }
     }, [canvasRef.current])
 
 
     const addToCanvas = (obj: fabric.Object) => {
-        console.log('hi', fCanvas, visibleGroup)
         fCanvas?.add(obj)
         visibleGroup?.add(obj)
     }
