@@ -1,18 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
 import { fabric } from 'fabric'
 import { useAppDispatch, useAppSelector } from './hooks'
-import { editorMouseDown, editorMouseMove, editorMouseUp, editorObjectDeselected, editorObjectSelected, resetMousePositions } from '../store/editor'
-import { EditorTool } from '../types/editor'
+import { editorMouseDown, editorMouseMove, editorMouseUp, editorObjectSelected, resetMousePositions, toolSelected } from '../store/editor'
+import { EditorTool, SHAPE_TOOLS } from '../types/editor'
+import { ElementFactory } from '../editor/shape-element-creator'
+import Editor from '../components/editor'
 
 
-const prepEventForDispatch = (event: fabric.IEvent<MouseEvent>): Record<string, any> => {
+export interface FabricEvent {
+    pointer: {
+        x: number,
+        y: number
+    },
+    hasTarget: boolean
+}
+
+const prepEventForDispatch = (event: fabric.IEvent<MouseEvent>, name: string): FabricEvent => {
+    console.log(name, !!event.target, event)
     return {
-        ...event,
-        e: undefined,
-        target: undefined,
-        absolutePointer: undefined,
-        currentTarget: undefined,
-        transform: undefined
+        pointer: event.pointer || {x: 0, y: 0},
+        hasTarget: !!event.target
+
     }
 }
 export const useFabric = (
@@ -46,11 +54,14 @@ export const useFabric = (
     useEffect(()=> {
         if (!fabricCanvas) return
         if (!(mouseUpPosition && mouseDownPosition)) return
+        console.log('is object selected', isObjectSelected)
         if (isObjectSelected) {
-            console.log('object selected')
             dispatch(resetMousePositions())
             return
         }
+
+        if (!SHAPE_TOOLS.includes(selectedTool)) return
+
         const left = Math.floor(Math.min(mouseDownPosition.x, mouseUpPosition.x))
         const top = Math.floor(Math.min(mouseDownPosition.y, mouseUpPosition.y))
         const right = Math.floor(Math.max(mouseDownPosition.x, mouseUpPosition.x))
@@ -58,59 +69,33 @@ export const useFabric = (
 
         const width = right - left
         const height = bottom - top
+
         if (width < 2 || height < 2) {
             dispatch(resetMousePositions())
             return
         }
-        if (selectedTool === EditorTool.Rectangle) {
-            console.log('rect')
-            const rect = new fabric.Rect({
-                fill: selectedColor,
-                left,
-                top,
-                width,
-                height,
 
-            })
-            fabricCanvas.add(rect)
-            fabricCanvas.bringToFront(rect)
-            rect.setCoords()
-            // fabricCanvas.renderAll()
-            fabricCanvas.setActiveObject(rect)
-            dispatch(resetMousePositions())
-        } else if (selectedTool === EditorTool.Triangle) {
-            const tri = new fabric.Triangle({
-                fill: selectedColor,
-                left,
-                top,
-                width,
-                height
-            })
-            fabricCanvas.add(tri)
-            dispatch(resetMousePositions())
-        } else if (selectedTool === EditorTool.Circle) {
-            const circ = new fabric.Circle({
-                fill: selectedColor,
-                radius: Math.max(width / 2, height / 2),
-                left,
-                top
-            })
-            fabricCanvas.add(circ)
-            dispatch(resetMousePositions())
-        }
+        const shape = ElementFactory.produceShape({
+            fill: selectedColor,
+            left,
+            top,
+            width,
+            height,
+            toolType: selectedTool
+        })
+
+        fabricCanvas.add(shape)
+        dispatch(resetMousePositions())
+
         
     },[mouseUpPosition, mouseDownPosition])
 
     useEffect(() => {
         if (!fabricCanvas) return
-        if (selectedTool === EditorTool.FreeDraw) {
-            fabricCanvas.isDrawingMode = true
-            fabricCanvas.selection = false
-        } else {
-            fabricCanvas.selection = true
-            fabricCanvas.isDrawingMode = false
-        }
+        fabricCanvas.isDrawingMode = selectedTool === EditorTool.FreeDraw
+        fabricCanvas.selection = selectedTool === EditorTool.Select
     }, [selectedTool])
+
     useEffect(() => {
         if (!canvasRef.current || fabricCanvas) return
 
@@ -129,15 +114,17 @@ export const useFabric = (
         setVisibleGroup(group)
         setFabricCanvas(canvas)
 
-        const bindings: {key: fabric.EventName, handler: (event: Record<string, any>) => void}[] = [
+        const bindings: {key: fabric.EventName, handler: (event: FabricEvent) => void}[] = [
             {key: 'object:selected', handler: (event) => dispatch(editorObjectSelected(event))},
+            {key: 'object:moving', handler: (event) => dispatch(editorObjectSelected(event))},
+            {key: 'group:selected', handler: (event) => dispatch(editorObjectSelected(event))},
             {key: 'mouse:down', handler: (event) => dispatch(editorMouseDown(event))},
             {key: 'mouse:up', handler: (event) => dispatch(editorMouseUp(event))},
-            {key: 'mouse:move', handler: (event) => dispatch(editorMouseMove(event))},
+            // {key: 'mouse:move', handler: (event) => dispatch(editorMouseMove(event))},
         ]
 
         bindings.forEach(binding => {
-            canvas.on(binding.key, (event) => binding.handler(prepEventForDispatch(event)))
+            canvas.on(binding.key, (event) => binding.handler(prepEventForDispatch(event, binding.key)))
         })
 
         if (onLoaded) {

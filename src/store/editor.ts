@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { EditorTool } from "@/types/editor";
+import { FabricEvent } from "../hooks/use-fabric";
 
 interface EditorState {
     selectedTool: EditorTool,
@@ -35,13 +36,14 @@ const editorStore = createSlice({
             state.mouseDownPosition = undefined
             state.mouseUpPosition = undefined
         },
-        editorMouseDown(state, action: PayloadAction<Record<string, any>>) {
+        editorMouseDown(state, action: PayloadAction<FabricEvent>) {
             const x = action.payload.pointer.x
             const y = action.payload.pointer.y
+            state.isObjectSelected = action.payload.hasTarget
             state.mouseDownPosition = {x, y}
             state.isMouseDown = true
         },
-        editorMouseUp(state, action: PayloadAction<Record<string, any>>) {
+        editorMouseUp(state, action: PayloadAction<FabricEvent>) {
             const x = action.payload.pointer.x
             const y = action.payload.pointer.y
             state.mouseUpPosition =  {x, y}
@@ -53,10 +55,11 @@ const editorStore = createSlice({
             state.mouseDownPosition = undefined
             state.mouseUpPosition = undefined
         },
-        editorMouseMove(state, action: PayloadAction<Record<string, any>>) {
+        editorMouseMove(state, action: PayloadAction<FabricEvent>) {
             // console.log('mouse move', action)
         },
-        editorObjectSelected(state, action: PayloadAction<Record<string, any>>) {
+        editorObjectSelected(state, action: PayloadAction<FabricEvent>) {
+            console.log('object selected')
             state.isObjectSelected = true
         },
         colorChanged(state, action: PayloadAction<string>) {

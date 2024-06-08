@@ -2,7 +2,6 @@ import { ButtonGroup, Button } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '@/hooks/hooks'
 import { EditorTool } from '@/types/editor'
 import { toolSelected } from '@/store/editor'
-import Editor from './editor'
 
 const EditorToolSelect: React.FC = () => {
     const dispatch = useAppDispatch()

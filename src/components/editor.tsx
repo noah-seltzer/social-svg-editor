@@ -32,12 +32,7 @@ const Editor: React.FC = () => {
             fabricCanvas.setActiveObject(rect)
         }
     )
-
-    // const canvas = <div>
-    //     <canvas ref={canvasRef} width='600' height='600'></canvas>
-    //     </div>
-
-    // const MemoCanvas = memo(() => canvas)
+    
     console.log('rendering canvas')
     return (
         <main className='flex min-h-screen flex-col items-center justify-between p-24 gap-8'>
