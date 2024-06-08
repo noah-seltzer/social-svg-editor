@@ -4,6 +4,7 @@ import { useFabric } from '../hooks/use-fabric'
 import EditorToolSelect from './editor-tool-select'
 import { useAppDispatch, useAppSelector } from '../hooks/hooks'
 import React, { MouseEventHandler, useState, memo } from 'react'
+import EditorColorSelect from './editor-color-select'
 
 const Editor: React.FC = () => {
     const { canvasRef, addToCanvas } = useFabric(
@@ -29,8 +30,7 @@ const Editor: React.FC = () => {
             rect.setCoords()
             rect2.setCoords()
             fabricCanvas.setActiveObject(rect)
-        },
-
+        }
     )
 
     // const canvas = <div>
@@ -40,18 +40,22 @@ const Editor: React.FC = () => {
     // const MemoCanvas = memo(() => canvas)
     console.log('rendering canvas')
     return (
-        <main className='flex min-h-screen flex-col items-center justify-between p-24'>
-            <Button variant='outlined'>
-                Export
-            </Button>
+        <main className='flex min-h-screen flex-col items-center justify-between p-24 gap-8'>
+            <Button variant='outlined'>Export</Button>
 
-            <div className='flex flex-row'>
-                <div>
+            <div className='flex flex-row items-center justify-between gap-8'>
+                <div className='flex flex-col items-center gap-4'>
+                    <EditorColorSelect />
                     <EditorToolSelect />
                 </div>
                 <div>
-        <canvas className='border' ref={canvasRef} width='600' height='600'></canvas>
-        </div>
+                    <canvas
+                        className='border border-sky-500'
+                        ref={canvasRef}
+                        width='600'
+                        height='600'
+                    ></canvas>
+                </div>
             </div>
         </main>
     )

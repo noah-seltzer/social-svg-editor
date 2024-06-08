@@ -2,6 +2,7 @@ import { ButtonGroup, Button } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '@/hooks/hooks'
 import { EditorTool } from '@/types/editor'
 import { toolSelected } from '@/store/editor'
+import Editor from './editor'
 
 const EditorToolSelect: React.FC = () => {
     const dispatch = useAppDispatch()
@@ -10,6 +11,10 @@ const EditorToolSelect: React.FC = () => {
 
     const tools = [
         {
+            label: 'Freedraw',
+            slug: EditorTool.FreeDraw
+        },
+        {
             label: 'Select',
             slug: EditorTool.Select
         },
@@ -17,10 +22,6 @@ const EditorToolSelect: React.FC = () => {
             label: 'Rectangle',
             slug: EditorTool.Rectangle
         },
-        // {
-        //     label: 'Freedraw',
-        //     slug: EditorTool.FreeDraw
-        // },
         {
             label: 'Triangle',
             slug: EditorTool.Triangle

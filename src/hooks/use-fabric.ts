@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { fabric } from 'fabric'
 import { useAppDispatch, useAppSelector } from './hooks'
-import { editorMouseDown, editorMouseMove, editorMouseUp, resetMousePositions } from '../store/editor'
+import { editorMouseDown, editorMouseMove, editorMouseUp, editorObjectDeselected, editorObjectSelected, resetMousePositions } from '../store/editor'
 import { EditorTool } from '../types/editor'
 
 
@@ -30,7 +30,9 @@ export const useFabric = (
 
     const mouseDownPosition = useAppSelector(state => state.editor.mouseDownPosition)
     const mouseUpPosition = useAppSelector(state => state.editor.mouseUpPosition)
+    const isObjectSelected = useAppSelector(state => state.editor.isObjectSelected)
     const selectedTool = useAppSelector(state => state.editor.selectedTool)
+    const selectedColor = useAppSelector(state => state.editor.color)
 
     useEffect(() => {
         if (!fabricCanvas) return
@@ -40,10 +42,15 @@ export const useFabric = (
             fabricCanvas.selection = false
         }
     }, [selectedTool])
+
     useEffect(()=> {
         if (!fabricCanvas) return
         if (!(mouseUpPosition && mouseDownPosition)) return
-        
+        if (isObjectSelected) {
+            console.log('object selected')
+            dispatch(resetMousePositions())
+            return
+        }
         const left = Math.floor(Math.min(mouseDownPosition.x, mouseUpPosition.x))
         const top = Math.floor(Math.min(mouseDownPosition.y, mouseUpPosition.y))
         const right = Math.floor(Math.max(mouseDownPosition.x, mouseUpPosition.x))
@@ -51,10 +58,14 @@ export const useFabric = (
 
         const width = right - left
         const height = bottom - top
+        if (width < 2 || height < 2) {
+            dispatch(resetMousePositions())
+            return
+        }
         if (selectedTool === EditorTool.Rectangle) {
             console.log('rect')
             const rect = new fabric.Rect({
-                fill: 'red',
+                fill: selectedColor,
                 left,
                 top,
                 width,
@@ -69,7 +80,7 @@ export const useFabric = (
             dispatch(resetMousePositions())
         } else if (selectedTool === EditorTool.Triangle) {
             const tri = new fabric.Triangle({
-                fill: 'green',
+                fill: selectedColor,
                 left,
                 top,
                 width,
@@ -79,8 +90,8 @@ export const useFabric = (
             dispatch(resetMousePositions())
         } else if (selectedTool === EditorTool.Circle) {
             const circ = new fabric.Circle({
-                fill: 'blue',
-                radius: width / 2,
+                fill: selectedColor,
+                radius: Math.max(width / 2, height / 2),
                 left,
                 top
             })
@@ -91,55 +102,38 @@ export const useFabric = (
     },[mouseUpPosition, mouseDownPosition])
 
     useEffect(() => {
+        if (!fabricCanvas) return
+        if (selectedTool === EditorTool.FreeDraw) {
+            fabricCanvas.isDrawingMode = true
+            fabricCanvas.selection = false
+        } else {
+            fabricCanvas.selection = true
+            fabricCanvas.isDrawingMode = false
+        }
+    }, [selectedTool])
+    useEffect(() => {
         if (!canvasRef.current || fabricCanvas) return
 
+        console.log('creating new canvas', canvasRef.current)
         const canvas = new fabric.Canvas(canvasRef.current, {
             interactive: true,
-            selection: true,
+            selection: false,
             centeredScaling: true,
             centeredRotation: true,
-            preserveObjectStacking: true
+            preserveObjectStacking: true,
+            isDrawingMode: true
         })
 
         const group = new fabric.Group()
-
-        // const canvasBackground = new fabric.Rect({
-        //     left: 0,
-        //     top: 0,
-        //     fill: 'gray',
-        //     width: 600,
-        //     height: 600,
-        //     selectable: false
-        // })
-        // canvas.add(canvasBackground)
-        // canvasBackground.setCoords()
-        // const background = new fabric.Rect({
-        //     left: 50,
-        //     top: 50,
-        //     fill: 'white',
-        //     width: 500,
-        //     height: 500,
-        //     selectable: false
-        // })
-        // background.setCoords()
-        // canvas.add(background)
-        // group.add(background)
-        // const groupSelect = new fabric.ActiveSelection([
-        //     background,
-        //     canvasBackground
-        // ])
-
-        // canvas.setActiveObject(groupSelect)
-
-        // canvas.discardActiveObject()
 
         setVisibleGroup(group)
         setFabricCanvas(canvas)
 
         const bindings: {key: fabric.EventName, handler: (event: Record<string, any>) => void}[] = [
+            {key: 'object:selected', handler: (event) => dispatch(editorObjectSelected(event))},
             {key: 'mouse:down', handler: (event) => dispatch(editorMouseDown(event))},
             {key: 'mouse:up', handler: (event) => dispatch(editorMouseUp(event))},
-            {key: 'mouse:move', handler: (event) => dispatch(editorMouseMove(event))}
+            {key: 'mouse:move', handler: (event) => dispatch(editorMouseMove(event))},
         ]
 
         bindings.forEach(binding => {
@@ -149,7 +143,7 @@ export const useFabric = (
         if (onLoaded) {
             onLoaded(canvas)
         }
-    }, [canvasRef.current])
+    }, [])
 
 
     const addToCanvas = (obj: fabric.Object) => {

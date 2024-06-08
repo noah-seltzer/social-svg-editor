@@ -1,12 +1,13 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { EditorTool } from "@/types/editor";
-import { fabric } from 'fabric'
 
 interface EditorState {
     selectedTool: EditorTool,
     mouseDownPosition: Point | undefined,
     mouseUpPosition: Point | undefined,
-    isMouseDown: boolean
+    isMouseDown: boolean,
+    isObjectSelected: boolean,
+    color: string
 }
 interface Point {
     x: number, y: number
@@ -17,10 +18,12 @@ export interface MouseEvent {
 }
 
 const createInitialState = (): EditorState => ({
-    selectedTool: EditorTool.Select,
+    selectedTool: EditorTool.FreeDraw,
     mouseDownPosition: undefined,
     mouseUpPosition: undefined,
     isMouseDown: false,
+    isObjectSelected: false,
+    color: '#ff0000'
 })
 
 const editorStore = createSlice({
@@ -33,18 +36,18 @@ const editorStore = createSlice({
             state.mouseUpPosition = undefined
         },
         editorMouseDown(state, action: PayloadAction<Record<string, any>>) {
-            console.log('mouse down')
             const x = action.payload.pointer.x
             const y = action.payload.pointer.y
             state.mouseDownPosition = {x, y}
             state.isMouseDown = true
         },
         editorMouseUp(state, action: PayloadAction<Record<string, any>>) {
-            console.log('mouse up')
             const x = action.payload.pointer.x
             const y = action.payload.pointer.y
             state.mouseUpPosition =  {x, y}
             state.isMouseDown = false
+            state.isObjectSelected = false
+
         },
         resetMousePositions(state) {
             state.mouseDownPosition = undefined
@@ -52,6 +55,12 @@ const editorStore = createSlice({
         },
         editorMouseMove(state, action: PayloadAction<Record<string, any>>) {
             // console.log('mouse move', action)
+        },
+        editorObjectSelected(state, action: PayloadAction<Record<string, any>>) {
+            state.isObjectSelected = true
+        },
+        colorChanged(state, action: PayloadAction<string>) {
+            state.color = action.payload
         }
     },
 
@@ -62,7 +71,9 @@ export const {
     editorMouseDown,
     editorMouseMove,
     editorMouseUp,
-    resetMousePositions
+    resetMousePositions,
+    editorObjectSelected,
+    colorChanged
 } = editorStore.actions
 
 
