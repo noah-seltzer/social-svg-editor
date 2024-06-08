@@ -1,4 +1,7 @@
 export enum EditorTool {
     Rectangle,
-    FreeDraw
+    FreeDraw,
+    Circle,
+    Triangle,
+    Select
 } 

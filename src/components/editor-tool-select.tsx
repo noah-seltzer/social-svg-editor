@@ -10,12 +10,24 @@ const EditorToolSelect: React.FC = () => {
 
     const tools = [
         {
+            label: 'Select',
+            slug: EditorTool.Select
+        },
+        {
             label: 'Rectangle',
             slug: EditorTool.Rectangle
         },
+        // {
+        //     label: 'Freedraw',
+        //     slug: EditorTool.FreeDraw
+        // },
         {
-            label: 'Freedraw',
-            slug: EditorTool.FreeDraw
+            label: 'Triangle',
+            slug: EditorTool.Triangle
+        },
+        {
+            label: 'Circle',
+            slug: EditorTool.Circle
         }
     ]
     return (
