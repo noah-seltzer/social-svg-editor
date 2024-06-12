@@ -1,4 +1,4 @@
-function downloadSVG(filename: string, text: string) {
+export const downloadSVG = (filename: string, text: string) => {
     var element = document.createElement('a');
     element.setAttribute('href', 'data:data:image/svg+xml;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', filename);

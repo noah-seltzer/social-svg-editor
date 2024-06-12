@@ -99,7 +99,6 @@ export const useFabric = (
     useEffect(() => {
         if (!canvasRef.current || fabricCanvas) return
 
-        console.log('creating new canvas', canvasRef.current)
         const canvas = new fabric.Canvas(canvasRef.current, {
             interactive: true,
             selection: false,
@@ -114,6 +113,7 @@ export const useFabric = (
         setVisibleGroup(group)
         setFabricCanvas(canvas)
 
+        // bind events
         const bindings: {key: fabric.EventName, handler: (event: FabricEvent) => void}[] = [
             {key: 'object:selected', handler: (event) => dispatch(editorObjectSelected(event))},
             {key: 'object:moving', handler: (event) => dispatch(editorObjectSelected(event))},
@@ -127,9 +127,35 @@ export const useFabric = (
             canvas.on(binding.key, (event) => binding.handler(prepEventForDispatch(event, binding.key)))
         })
 
+        // add sample objects
+        const rect = new fabric.Rect({
+            left: 100,
+            top: 100,
+            fill: 'red',
+            width: 50,
+            height: 50
+        })
+    
+        const rect2 = new fabric.Rect({
+            left: 250,
+            top: 250,
+            fill: 'red',
+            width: 50,
+            height: 50
+        })
+    
+        canvas.add(rect)
+        canvas.add(rect2)
+        rect.setCoords()
+        rect2.setCoords()
+        canvas.setActiveObject(rect)
+        
         if (onLoaded) {
             onLoaded(canvas)
         }
+
+
+        
     }, [])
 
 

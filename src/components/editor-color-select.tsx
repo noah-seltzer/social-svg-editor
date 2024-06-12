@@ -1,5 +1,5 @@
-import { useAppDispatch } from "../hooks/hooks"
-import { colorChanged } from "../store/editor"
+import { useAppDispatch } from "@/hooks/hooks"
+import { colorChanged } from "@/store/editor"
 
 const EditorColorSelect: React.FC = () => {
     
