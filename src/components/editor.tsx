@@ -21,6 +21,7 @@ const Editor: React.FC = () => {
         downloadSVG('export.svg', fabricCanvas.toSVG())
     }
 
+
     return (
         <main className='h-screen bg-gray-200'>
             <Drawer
