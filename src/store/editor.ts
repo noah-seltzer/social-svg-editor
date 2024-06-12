@@ -40,7 +40,10 @@ const editorStore = createSlice({
             const x = action.payload.pointer.x
             const y = action.payload.pointer.y
             state.isObjectSelected = action.payload.hasTarget
-            if (!state.isObjectSelected) {
+            if (action.payload.hasTarget) {
+                state.mouseDownPosition = undefined
+                state.mouseUpPosition = undefined
+            } else {
                 state.mouseDownPosition = {x, y}
             }
             state.isMouseDown = true
@@ -48,7 +51,12 @@ const editorStore = createSlice({
         editorMouseUp(state, action: PayloadAction<FabricEvent>) {
             const x = action.payload.pointer.x
             const y = action.payload.pointer.y
-            state.mouseUpPosition =  {x, y}
+            if (state.mouseDownPosition) {
+                state.mouseUpPosition =  {x, y}
+            } else {
+                state.mouseDownPosition = undefined
+                state.mouseUpPosition = undefined
+            }
             state.isMouseDown = false
             state.isObjectSelected = false
 

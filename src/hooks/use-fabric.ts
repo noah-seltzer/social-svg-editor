@@ -38,7 +38,7 @@ export const useFabric = (
     const searchParams = useSearchParams()
  
     const canvasInitialize = searchParams.get('canvas')
-
+    console.log(canvasInitialize)
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const canvasParentRef = useRef<HTMLDivElement>(null)
@@ -60,6 +60,11 @@ export const useFabric = (
         fabricCanvas.setHeight(canvasParentRef.current.clientHeight)
         fabricCanvas.renderAll()
     }
+
+    useEffect(() => {
+        if (!fabricCanvas) return
+        fabricCanvas.freeDrawingBrush.color = selectedColor
+    }, [selectedColor])
 
     useEffect(() => {
         updateCanvasOnResize()
@@ -140,7 +145,8 @@ export const useFabric = (
             centeredRotation: true,
             preserveObjectStacking: true,
             isDrawingMode: true,
-            backgroundColor: '#F8FAFC'
+            backgroundColor: '#F8FAFC',
+            freeDrawingCursor: selectedColor
         })
 
         const group = new fabric.Group()
