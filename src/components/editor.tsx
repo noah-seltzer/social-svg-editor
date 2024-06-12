@@ -21,17 +21,6 @@ const Editor: React.FC = () => {
         downloadSVG('export.svg', fabricCanvas.toSVG())
     }
 
-    const shareUrl = () => {
-        if (!fabricCanvas) return
-        const json = JSON.stringify(fabricCanvas.toJSON())
-        const params = new URLSearchParams({
-            canvas: json
-        })
-
-        const url = `${window.location.origin}?${params.toString()}`
-        navigator.clipboard.writeText(url)
-    }
-
     return (
         <main className='h-screen bg-gray-200'>
             <Drawer
@@ -43,9 +32,6 @@ const Editor: React.FC = () => {
                     <EditorToolSelect />
                     <Button variant='outlined' onClick={exportSvg}>
                         Download
-                    </Button>
-                    <Button variant='outlined' onClick={shareUrl}>
-                        Share
                     </Button>
                 </div>
             </Drawer>

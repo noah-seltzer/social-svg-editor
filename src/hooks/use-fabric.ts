@@ -3,17 +3,13 @@ import { fabric } from 'fabric'
 import { useAppDispatch, useAppSelector } from './hooks'
 import {
     editorMouseDown,
-    editorMouseMove,
     editorMouseUp,
     editorObjectSelected,
     resetMousePositions,
-    toolSelected
-} from '../store/editor'
-import { EditorTool, SHAPE_TOOLS } from '../types/editor'
-import { ElementFactory } from '../editor/shape-element-creator'
-import Editor from '../components/editor'
-import { useSearchParams } from 'next/navigation'
-import { useWindowSize } from './use-window-size'
+} from '@/store/editor'
+import { EditorTool, SHAPE_TOOLS } from '@/types/editor'
+import { ElementFactory } from '@/editor/shape-element-creator'
+import { useWindowSize } from '@/hooks/use-window-size'
 
 export interface FabricEvent {
     pointer: {
@@ -42,10 +38,6 @@ export const useFabric = (
     isLoaded: boolean
 } => {
     const { width: windowWidth, height: windowHeight } = useWindowSize()
-    const searchParams = useSearchParams()
-
-    const canvasInitialize = searchParams.get('canvas')
-    console.log(canvasInitialize)
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const canvasParentRef = useRef<HTMLDivElement>(null)
@@ -205,6 +197,15 @@ export const useFabric = (
             )
         })
 
+        // if (canvasInitialize) {
+        //     console.log(JSON.parse(canvasInitialize))
+        //     canvas.loadFromJSON(
+        //         JSON.parse(canvasInitialize),
+        //         (canvas: fabric.Canvas) => {
+        //             canvas.renderAll()
+        //         }
+        //     )
+        // } else {
         // add sample objects
         const rect = new fabric.Rect({
             left: 100,
@@ -227,6 +228,7 @@ export const useFabric = (
         rect.setCoords()
         rect2.setCoords()
         canvas.setActiveObject(rect)
+        // }
 
         if (onLoaded) {
             onLoaded(canvas)
