@@ -5,6 +5,8 @@ import { editorMouseDown, editorMouseMove, editorMouseUp, editorObjectSelected, 
 import { EditorTool, SHAPE_TOOLS } from '../types/editor'
 import { ElementFactory } from '../editor/shape-element-creator'
 import Editor from '../components/editor'
+import { useSearchParams } from 'next/navigation'
+import { useWindowSize } from './use-window-size'
 
 
 export interface FabricEvent {
@@ -16,7 +18,6 @@ export interface FabricEvent {
 }
 
 const prepEventForDispatch = (event: fabric.IEvent<MouseEvent>, name: string): FabricEvent => {
-    console.log(name, !!event.target, event)
     return {
         pointer: event.pointer || {x: 0, y: 0},
         hasTarget: !!event.target
@@ -28,19 +29,41 @@ export const useFabric = (
 ): {
     canvasRef: React.MutableRefObject<HTMLCanvasElement | null>
     fabricCanvas: fabric.Canvas | Falsy
-    addToCanvas: (obj: fabric.Object) => void
+    addToCanvas: (obj: fabric.Object) => void,
+    isLoaded: boolean
 } => {
+
+    const {width: windowWidth, height: windowHeight } = useWindowSize()
+    const searchParams = useSearchParams()
+ 
+    const canvasInitialize = searchParams.get('canvas')
+
+
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const dispatch = useAppDispatch()
 
     const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null)
     const [visibleGroup, setVisibleGroup] = useState<fabric.Group | null>(null)
+    const [loaded, setLoaded] = useState<boolean>(false)
 
     const mouseDownPosition = useAppSelector(state => state.editor.mouseDownPosition)
     const mouseUpPosition = useAppSelector(state => state.editor.mouseUpPosition)
     const isObjectSelected = useAppSelector(state => state.editor.isObjectSelected)
     const selectedTool = useAppSelector(state => state.editor.selectedTool)
     const selectedColor = useAppSelector(state => state.editor.color)
+
+    const updateCanvasOnResize = () => {
+        if (!canvasRef.current || !fabricCanvas) return
+        console.log(windowHeight, windowWidth)
+        canvasRef.current.width = windowWidth
+        canvasRef.current.height = windowHeight
+        fabricCanvas.setWidth(windowWidth)
+        fabricCanvas.setHeight(windowHeight)
+    }
+
+    useEffect(() => {
+        updateCanvasOnResize()
+    }, [windowWidth, windowHeight])
 
     useEffect(() => {
         if (!fabricCanvas) return
@@ -98,14 +121,26 @@ export const useFabric = (
 
     useEffect(() => {
         if (!canvasRef.current || fabricCanvas) return
+        console.log('init')
+        
+        // init
+        
+        // const parent = canvasRef.current.parentElement
 
+        updateCanvasOnResize()
+        if (parent) {
+            // canvasRef.current.addEventListener()
+        }
+        
+        
         const canvas = new fabric.Canvas(canvasRef.current, {
             interactive: true,
             selection: false,
             centeredScaling: true,
             centeredRotation: true,
             preserveObjectStacking: true,
-            isDrawingMode: true
+            isDrawingMode: true,
+            backgroundColor: '#F8FAFC'
         })
 
         const group = new fabric.Group()
@@ -154,7 +189,9 @@ export const useFabric = (
             onLoaded(canvas)
         }
 
+        setLoaded(true)
 
+        console.log('canvas initialized')
         
     }, [])
 
@@ -164,5 +201,5 @@ export const useFabric = (
         visibleGroup?.add(obj)
     }
 
-    return { canvasRef, fabricCanvas: fabricCanvas, addToCanvas }
+    return { canvasRef, fabricCanvas: fabricCanvas, addToCanvas, isLoaded: loaded }
 }
