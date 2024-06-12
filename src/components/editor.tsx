@@ -1,19 +1,16 @@
-import { fabric } from 'fabric'
 import { AppBar, Button, CircularProgress, Drawer, Grid } from '@mui/material'
-// import Grid from '@mui/material/Unstable_Grid2';
 import { useFabric } from '@/hooks/use-fabric'
 import EditorToolSelect from '@/components/editor-tool-select'
 import EditorColorSelect from '@/components/editor-color-select'
 import { downloadSVG } from '@/util/file'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import MenuIcon from '@mui/icons-material/Menu'
-import { usePathname } from 'next/navigation'
-import { join } from 'path'
 
 const Editor: React.FC = () => {
-    const { canvasRef, fabricCanvas, isLoaded: canvasIsLoaded } = useFabric()
+    const { canvasRef, canvasParentRef, fabricCanvas, isLoaded: canvasIsLoaded } = useFabric()
+
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false)
-    const pathname = usePathname()
+
     const exportSvg = () => {
         if (!fabricCanvas) return
         downloadSVG('export.svg', fabricCanvas.toSVG())
@@ -21,29 +18,25 @@ const Editor: React.FC = () => {
 
     const shareUrl = () => {
         if (!fabricCanvas) return
-        // console.log(fabricCanvas.toJSON())
         const json = fabricCanvas.toJSON()
         const encoded = JSON.stringify(json)
-        const url = `${window.location.pathname}?canvas"${encoded}"`
-        console.log(url)
+        const url = `${window.location.origin}?canvas"${encoded}"`
         navigator.clipboard.writeText(url)
     }
-    console.log('loaded', canvasIsLoaded)
+
+    const SpinnerLoaderOverlay = <div className='z-100 left-0 top-0 bg-white h-screen w-screen'>
+    <div className='w-full h-full flex items-center justify-center'>
+        <CircularProgress />
+    </div>
+</div>
     return (
-        <main>
-            <Button
-                className='w-min fixed left-0 top-0 z-10 py-4 m-2'
-                variant='contained'
-                onClick={() => setDrawerOpen(true)}
-            >
-                <MenuIcon />
-            </Button>
-            <div>
+        <main className='h-full'>
+            <div className='h-full'>
                 <Drawer
                     className='p-4 py-16'
                     open={drawerOpen}
                     onClose={() => setDrawerOpen(false)}
-                >
+                    >
                     <div className='flex flex-col items-center gap-4 px-4 pt-16'>
                         <EditorColorSelect />
                         <EditorToolSelect />
@@ -55,20 +48,24 @@ const Editor: React.FC = () => {
                         </Button>
                     </div>
                 </Drawer>
-                <div className='w-full h-full'>
-                    <canvas
-                        className='border border-sky-500'
-                        ref={canvasRef}
-                        width='600'
-                        height='600'
-                    ></canvas>
+                <Button
+                    className='w-min py-4 m-2'
+                    variant='contained'
+                    onClick={() => setDrawerOpen(true)}
+                    >
+                    <MenuIcon />
+                </Button>
+                <div className='mx-2'>
+                    <div ref={canvasParentRef} className='w-full h-full'>
+                        <canvas
+                            className='border border-sky-500'
+                            ref={canvasRef}
+                            width='600'
+                            height='600'
+                            ></canvas>
+                    </div>
                 </div>
             </div>
-            {!canvasIsLoaded ?? (
-                <div className='z-100 fixed left-0 top-0 bg-white w-full h-full flex justify-center items-center'>
-                    <CircularProgress />
-                </div>
-            )}
         </main>
     )
 }

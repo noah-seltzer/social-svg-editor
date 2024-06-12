@@ -28,6 +28,7 @@ export const useFabric = (
     onLoaded?: (canvas: fabric.Canvas) => void
 ): {
     canvasRef: React.MutableRefObject<HTMLCanvasElement | null>
+    canvasParentRef: React.MutableRefObject<HTMLDivElement | null>
     fabricCanvas: fabric.Canvas | Falsy
     addToCanvas: (obj: fabric.Object) => void,
     isLoaded: boolean
@@ -40,6 +41,7 @@ export const useFabric = (
 
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
+    const canvasParentRef = useRef<HTMLDivElement>(null)
     const dispatch = useAppDispatch()
 
     const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null)
@@ -53,12 +55,10 @@ export const useFabric = (
     const selectedColor = useAppSelector(state => state.editor.color)
 
     const updateCanvasOnResize = () => {
-        if (!canvasRef.current || !fabricCanvas) return
-        console.log(windowHeight, windowWidth)
-        canvasRef.current.width = windowWidth
-        canvasRef.current.height = windowHeight
-        fabricCanvas.setWidth(windowWidth)
-        fabricCanvas.setHeight(windowHeight)
+        if (!canvasRef.current || !fabricCanvas || !canvasParentRef.current) return
+        fabricCanvas.setWidth(canvasParentRef.current.clientWidth)
+        fabricCanvas.setHeight(canvasParentRef.current.clientHeight)
+        fabricCanvas.renderAll()
     }
 
     useEffect(() => {
@@ -77,7 +77,6 @@ export const useFabric = (
     useEffect(()=> {
         if (!fabricCanvas) return
         if (!(mouseUpPosition && mouseDownPosition)) return
-        console.log('is object selected', isObjectSelected)
         if (isObjectSelected) {
             dispatch(resetMousePositions())
             return
@@ -108,6 +107,7 @@ export const useFabric = (
         })
 
         fabricCanvas.add(shape)
+        fabricCanvas.setActiveObject(shape)
         dispatch(resetMousePositions())
 
         
@@ -201,5 +201,5 @@ export const useFabric = (
         visibleGroup?.add(obj)
     }
 
-    return { canvasRef, fabricCanvas: fabricCanvas, addToCanvas, isLoaded: loaded }
+    return { canvasRef, canvasParentRef, fabricCanvas: fabricCanvas, addToCanvas, isLoaded: loaded }
 }

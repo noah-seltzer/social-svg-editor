@@ -40,7 +40,9 @@ const editorStore = createSlice({
             const x = action.payload.pointer.x
             const y = action.payload.pointer.y
             state.isObjectSelected = action.payload.hasTarget
-            state.mouseDownPosition = {x, y}
+            if (!state.isObjectSelected) {
+                state.mouseDownPosition = {x, y}
+            }
             state.isMouseDown = true
         },
         editorMouseUp(state, action: PayloadAction<FabricEvent>) {
@@ -56,10 +58,8 @@ const editorStore = createSlice({
             state.mouseUpPosition = undefined
         },
         editorMouseMove(state, action: PayloadAction<FabricEvent>) {
-            // console.log('mouse move', action)
         },
         editorObjectSelected(state, action: PayloadAction<FabricEvent>) {
-            console.log('object selected')
             state.isObjectSelected = true
         },
         colorChanged(state, action: PayloadAction<string>) {
