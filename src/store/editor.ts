@@ -1,17 +1,18 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { EditorTool } from "@/types/editor";
-import { FabricEvent } from "../hooks/use-fabric";
+import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { EditorTool } from '@/types/editor'
+import { FabricEvent } from '../hooks/use-fabric'
 
 interface EditorState {
-    selectedTool: EditorTool,
-    mouseDownPosition: Point | undefined,
-    mouseUpPosition: Point | undefined,
-    isMouseDown: boolean,
-    isObjectSelected: boolean,
+    selectedTool: EditorTool
+    mouseDownPosition: Point | undefined
+    mouseUpPosition: Point | undefined
+    isMouseDown: boolean
+    isObjectSelected: boolean
     color: string
 }
 interface Point {
-    x: number, y: number
+    x: number
+    y: number
 }
 export interface MouseEvent {
     pointer: Point
@@ -44,7 +45,7 @@ const editorStore = createSlice({
                 state.mouseDownPosition = undefined
                 state.mouseUpPosition = undefined
             } else {
-                state.mouseDownPosition = {x, y}
+                state.mouseDownPosition = { x, y }
             }
             state.isMouseDown = true
         },
@@ -52,29 +53,26 @@ const editorStore = createSlice({
             const x = action.payload.pointer.x
             const y = action.payload.pointer.y
             if (state.mouseDownPosition) {
-                state.mouseUpPosition =  {x, y}
+                state.mouseUpPosition = { x, y }
             } else {
                 state.mouseDownPosition = undefined
                 state.mouseUpPosition = undefined
             }
             state.isMouseDown = false
             state.isObjectSelected = false
-
         },
         resetMousePositions(state) {
             state.mouseDownPosition = undefined
             state.mouseUpPosition = undefined
         },
-        editorMouseMove(state, action: PayloadAction<FabricEvent>) {
-        },
+        editorMouseMove(state, action: PayloadAction<FabricEvent>) {},
         editorObjectSelected(state, action: PayloadAction<FabricEvent>) {
             state.isObjectSelected = true
         },
         colorChanged(state, action: PayloadAction<string>) {
             state.color = action.payload
         }
-    },
-
+    }
 })
 
 export const {
@@ -86,6 +84,5 @@ export const {
     editorObjectSelected,
     colorChanged
 } = editorStore.actions
-
 
 export default editorStore.reducer

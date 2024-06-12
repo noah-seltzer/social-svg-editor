@@ -11,7 +11,7 @@ const EditorToolSelect: React.FC = () => {
     const tools = [
         {
             label: 'Freedraw',
-            slug: EditorTool.FreeDraw,
+            slug: EditorTool.FreeDraw
         },
         {
             label: 'Select',

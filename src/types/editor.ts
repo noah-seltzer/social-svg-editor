@@ -3,7 +3,11 @@ export enum EditorTool {
     FreeDraw,
     Circle,
     Triangle,
-    Select,
-} 
+    Select
+}
 
-export const SHAPE_TOOLS = [EditorTool.Rectangle, EditorTool.Circle, EditorTool.Triangle]
+export const SHAPE_TOOLS = [
+    EditorTool.Rectangle,
+    EditorTool.Circle,
+    EditorTool.Triangle
+]
